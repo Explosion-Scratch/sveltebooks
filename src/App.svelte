@@ -18,7 +18,9 @@
 	]
 	let selectedNotebook = notebooks[0];
   $: notebook = notebooks.find(i => i.id === selectedNotebook.id).content;
-	onMount(() => {
+	onMount(async () => {
+		restoreNotebooks();
+		await new Promise(r => setTimeout(r))
 		const dl = throttle(console.error, 1000);
 		const as = throttle(console.assert, 500);
 		solve(notebook);
@@ -35,6 +37,7 @@
 				cj.updateCode(notebook)
 				highlight(editor);
 				cj.restore(cur);
+				saveNotebooks();
 			} catch(e){
 			}
 		}, 1)
@@ -46,10 +49,20 @@
 		})
 	})
 	function restoreNotebooks(){
-		
+		if (localStorage.notebooks){
+			notebooks = JSON.parse(localStorage.notebooks);
+			selectedNotebook = notebooks[0]
+			if (localStorage.selected){
+				selectedNotebook = notebooks.find(i => i.id === localStorage.selected);
+				if (!selectedNotebook){
+					selectedNotebook = notebooks[0];
+				}
+			}
+		}
 	}
 	function saveNotebooks(){
-		
+		localStorage.notebooks = JSON.stringify(notebooks);
+		localStorage.selected = selectedNotebook.id;
 	}
 	function throttle(func, delay) {
 		let lastTime = 0;
@@ -268,7 +281,7 @@
 		</button>
 		<ul class='notebooks'>
 			{#each notebooks as nb}
-			<li on:click={() => (selectedNotebook = notebooks.find(i => i.id === nb.id),cj.updateCode(selectedNotebook.content))}>{nb.title}</li>
+			<li class:selected={selectedNotebook.id === nb.id} on:click={() => (selectedNotebook = notebooks.find(i => i.id === nb.id),cj.updateCode(selectedNotebook.content))}>{nb.title}</li>
 			{/each}
 		</ul>
 	</div>
