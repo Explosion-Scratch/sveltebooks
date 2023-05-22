@@ -131,8 +131,8 @@
 				return a.toString();
 			}
 			let r = parseFloat(a, 10).toFixed(2);
-			if (r < 1e-11){
-				return '0'
+			if (r < 1e-11 && r > 0){
+				// return '0'
 			}
 			return r;
 		})
@@ -147,6 +147,9 @@
 		for (let line of lines){
 			if (line.startsWith('//') || line.startsWith('#') || !line.trim().length){
 				out[idx] = null;
+			}
+			if (line.split('=').length === 3){
+				line = line.split('=').slice(0, 2).join('=')
 			}
 			line = line.split('//')[0];
 			try {
